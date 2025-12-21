@@ -10,6 +10,8 @@ repos:
     hooks:
       - id: pytest
         name: Run tests
-        entry: pytest
+        entry: uv run pytest
         language: system
         pass_filenames: false
+        always_run: true
+

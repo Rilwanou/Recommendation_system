@@ -18,9 +18,6 @@ def _sample_df() -> pd.DataFrame:
     return pd.DataFrame({"id": [1, 2], "name": ["alice", "bob"]})
 
 
-
-
-
 class TestSaveCsvParamsValidation:
     def test_rejects_empty_filename(self, tmp_path: Path) -> None:
         with pytest.raises(ValidationError):

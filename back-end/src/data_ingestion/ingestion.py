@@ -23,18 +23,24 @@ files_urls = {
 
 
 SCRIPT_PATH = Path(__file__).resolve()
-BACKEND_DIR = SCRIPT_PATH.parents[2]      
-PROJECT_ROOT = BACKEND_DIR.parent         
-RAW_DIR = PROJECT_ROOT / "data" / "raw"   
+BACKEND_DIR = SCRIPT_PATH.parents[2]
+PROJECT_ROOT = BACKEND_DIR.parent
+RAW_DIR = PROJECT_ROOT / "data" / "raw"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 
 print("📁 Project root :", PROJECT_ROOT)
 print("📁 RAW_DIR      :", RAW_DIR)
 
+
 class SaveCsvParams(BaseModel):
     """Validation model for CSV saving parameters."""
-    raw_dir: Path = Field(..., description="Target directory where CSV files will be saved.")
-    filename: str = Field(..., min_length=1, description="Output CSV filename (e.g., 'orders.csv').")
+
+    raw_dir: Path = Field(
+        ..., description="Target directory where CSV files will be saved."
+    )
+    filename: str = Field(
+        ..., min_length=1, description="Output CSV filename (e.g., 'orders.csv')."
+    )
 
 
 class CsvSource(BaseModel):
@@ -43,6 +49,7 @@ class CsvSource(BaseModel):
 
     Exactly one of `url` or `path` must be provided.
     """
+
     url: HttpUrl | None = Field(default=None, description="HTTP(S) URL to a CSV file.")
     path: Path | None = Field(default=None, description="Local path to a CSV file.")
 
@@ -60,7 +67,7 @@ def load_csv(source: CsvSource) -> pd.DataFrame:
     """
     if source.url is not None:
         return pd.read_csv(str(source.url))
-    return pd.read_csv(source.path)  
+    return pd.read_csv(source.path)
 
 
 def save_csv(df: pd.DataFrame | None, filename: str, raw_dir: Path) -> None:
@@ -82,6 +89,7 @@ def save_csv(df: pd.DataFrame | None, filename: str, raw_dir: Path) -> None:
 
 def safe_len(df: pd.DataFrame | None) -> int:
     return 0 if df is None else len(df)
+
 
 df_customers = df_orders = df_order_items = df_products = None
 df_reviews = df_sellers = df_geolocation = df_payments = df_prod_translation = None

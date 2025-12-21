@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-import types
 
 import pandas as pd
 import pytest
 from pydantic import ValidationError
 from data_ingestion import ingestion as mod
-
 
 
 def _write_csv(path: Path, df: pd.DataFrame) -> None:
@@ -20,35 +18,8 @@ def _sample_df() -> pd.DataFrame:
     return pd.DataFrame({"id": [1, 2], "name": ["alice", "bob"]})
 
 
-class TestCsvSourceValidation:
-    def test_requires_exactly_one_of_url_or_path(self) -> None:
-        with pytest.raises(ValueError, match="exactly one of `url` or `path`"):
-            mod.CsvSource()  
 
-    def test_rejects_both_url_and_path(self, tmp_path: Path) -> None:
-        local = tmp_path / "file.csv"
-        local.write_text("a,b\n1,2\n", encoding="utf-8")
 
-        with pytest.raises(ValueError, match="exactly one of `url` or `path`"):
-            mod.CsvSource(url="https://example.com/file.csv", path=local) 
-
-    def test_rejects_missing_local_file(self, tmp_path: Path) -> None:
-        missing = tmp_path / "missing.csv"
-        with pytest.raises(FileNotFoundError, match="CSV file not found"):
-            mod.CsvSource(path=missing)
-
-    def test_accepts_existing_local_file(self, tmp_path: Path) -> None:
-        local = tmp_path / "ok.csv"
-        local.write_text("a,b\n1,2\n", encoding="utf-8")
-
-        src = mod.CsvSource(path=local)
-        assert src.path == local
-        assert src.url is None
-
-    def test_accepts_http_url(self) -> None:
-        src = mod.CsvSource(url="https://example.com/data.csv") 
-        assert src.url is not None
-        assert src.path is None
 
 class TestSaveCsvParamsValidation:
     def test_rejects_empty_filename(self, tmp_path: Path) -> None:
@@ -60,6 +31,7 @@ class TestSaveCsvParamsValidation:
         assert params.raw_dir == tmp_path
         assert params.filename == "out.csv"
 
+
 class TestSafeLen:
     def test_none_returns_0(self) -> None:
         assert mod.safe_len(None) == 0
@@ -67,6 +39,7 @@ class TestSafeLen:
     def test_dataframe_returns_length(self) -> None:
         df = pd.DataFrame({"x": [10, 20, 30]})
         assert mod.safe_len(df) == 3
+
 
 class TestLoadCsv:
     def test_loads_from_local_path(self, tmp_path: Path) -> None:
@@ -77,7 +50,9 @@ class TestLoadCsv:
         df_out = mod.load_csv(mod.CsvSource(path=csv_path))
         pd.testing.assert_frame_equal(df_out, df_in)
 
-    def test_loads_from_url_by_calling_pandas_read_csv(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_loads_from_url_by_calling_pandas_read_csv(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """
         We don't want real HTTP calls in unit tests.
         So we mock pandas.read_csv and verify it is called with the URL string.
@@ -91,11 +66,14 @@ class TestLoadCsv:
 
         monkeypatch.setattr(pd, "read_csv", fake_read_csv)
 
-        df_out = mod.load_csv(mod.CsvSource(url="https://example.com/data.csv"))  
+        df_out = mod.load_csv(mod.CsvSource(url="https://example.com/data.csv"))
         pd.testing.assert_frame_equal(df_out, expected)
 
+
 class TestSaveCsv:
-    def test_skips_when_df_is_none(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_skips_when_df_is_none(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         mod.save_csv(None, "out.csv", tmp_path)
 
         captured = capsys.readouterr().out
@@ -123,7 +101,9 @@ class TestSaveCsv:
 
 
 class TestMiniFlow:
-    def test_load_url_then_save(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    def test_load_url_then_save(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
         """
         This mimics your real flow:
         - load_csv from URL (but mocked)

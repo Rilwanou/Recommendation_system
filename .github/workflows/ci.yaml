@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "set_up"]
   pull_request:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Sync dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --group dev --group test
 
       - name: Lint (pre-commit)
         run: uv run pre-commit run --all-files --show-diff-on-failure

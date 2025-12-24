@@ -123,5 +123,11 @@ def run_ingestion(raw_dir: Path | None = None) -> None:
     save_csv(df_prod_translation, "product_category_name_translation.csv", raw_dir)
 
 
+def run_ingestion_with_summary(raw_dir: Path | None = None) -> dict:
+    raw_dir = raw_dir or default_raw_dir()
+    run_ingestion(raw_dir=raw_dir)
+    return {"raw_dir": str(raw_dir), "status": "done"}
+
+
 if __name__ == "__main__":
     run_ingestion()

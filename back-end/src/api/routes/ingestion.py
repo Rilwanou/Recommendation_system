@@ -9,7 +9,7 @@ class IngestionRequest(BaseModel):
     raw_subdir: str | None = None
 
 
-@router.post("/ingestion/run")
+@router.post("/ingestion/run") # summary = "load database")
 def run_ingestion(req: IngestionRequest):
     summary = run_ingestion_with_summary()
     return {"ok": True, "summary": summary.model_dump()}

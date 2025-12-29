@@ -1,15 +1,14 @@
 from __future__ import annotations
-
 from pathlib import Path
 import warnings
-
 import pandas as pd
 from pydantic import BaseModel, Field, HttpUrl
 
+
+
+
 warnings.filterwarnings("ignore")
-
 BASE_URL = "https://raw.githubusercontent.com/olist/work-at-olist-data/master/datasets/"
-
 files_urls = {
     "customers": BASE_URL + "olist_customers_dataset.csv",
     "orders": BASE_URL + "olist_orders_dataset.csv",
@@ -127,7 +126,3 @@ def run_ingestion_with_summary(raw_dir: Path | None = None) -> dict:
     raw_dir = raw_dir or default_raw_dir()
     run_ingestion(raw_dir=raw_dir)
     return {"raw_dir": str(raw_dir), "status": "done"}
-
-
-if __name__ == "__main__":
-    run_ingestion()

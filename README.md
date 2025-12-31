@@ -1,57 +1,57 @@
 # Recommendation System – Data Mining Project
 
-## Objectif
-Proposer un système de recommandation simple et interprétable qui attribue à chaque couple (utilisateur, produit) un score de pertinence.
-Ce score représente la probabilité que l’utilisateur achète le produit, à partir des caractéristiques du produit, du contexte utilisateur et de signaux issus de l’historique d’achats.
+## Objective
+Propose a simple and interpretable recommendation system that assigns a relevance score to each (user, product) pair.
+This score represents the probability that a user will purchase a product, based on product features, user context, and signals derived from purchase history.
 
-Le système s’appuie sur le fait que des produits achetés ensemble ou par des clients similaires ont de fortes chances d’être achetés à nouveau par d’autres clients.
+The system relies on the idea that products bought together or by similar customers are more likely to be purchased again by other customers.
 
-## Données
-Données Olist :
-- clients
-- commandes (livrées uniquement)
-- items de commande
-- produits
-- traduction des catégories
+## Data
+Olist dataset:
+- customers
+- orders (delivered only)
+- order items
+- products
+- category name translation
 
-## Feature engineering
-Chaque interaction (utilisateur, produit) est décrite par :
+## Feature Engineering
+Each (user, product) interaction is described by:
 
-### Variables numériques
+### Numerical Features
 - price
 - product_photos_qty
 - product_weight_g
 - product_length_cm
 - product_height_cm
 - product_width_cm
-- purchase_count (popularité globale du produit)
-- purchase_count_state (popularité locale par État)
-- recency_days (récence de l’achat)
+- purchase_count (global product popularity)
+- purchase_count_state (local popularity by state)
+- recency_days (purchase recency)
 
-### Variables catégorielles
+### Categorical Features
 - customer_state
 - customer_city
 - product_category_name_english
 
-### Signal relationnel
-- cooc_score (co-occurrence produit–produit dans un même panier)
+### Relational Signal
+- cooc_score (product–product co-occurrence within the same basket)
 
-## Labels (data mining)
-- Label = 1 : interaction observée (achat)
-- Label = 0 : interaction non observée (negative sampling)
-Ratio positifs / négatifs = 1:1.
+## Labels (Data Mining)
+- Label = 1: observed interaction (purchase)
+- Label = 0: non-observed interaction (negative sampling)
+Positive / negative ratio = 1:1.
 
-Il s’agit d’un problème de recommandation à feedback implicite (ranking), et non d’une classification classique.
+This is an implicit-feedback recommendation problem (ranking), not a classical classification task.
 
-## Prétraitement
-- Numérique : imputation médiane + standardisation
-- Catégoriel : imputation "missing" + OneHotEncoder
+## Preprocessing
+- Numerical: median imputation + standardization
+- Categorical: "missing" imputation + OneHotEncoder
 
-## Modèle
-- Régression logistique avec régularisation L2 (Ridge)
-- Sélection de C par validation croisée
-- Modèle final : C = 0.05
-- Métriques : ROC-AUC, PR-AUC (Average Precision)
+## Model
+- Logistic regression with L2 regularization (Ridge)
+- C selection via cross-validation
+- Final model: C = 0.05
+- Metrics: ROC-AUC, PR-AUC (Average Precision)
 
 ## Architecture
 backend/
@@ -70,30 +70,28 @@ models/
 notebooks/
   exploration.ipynb
 
-## Lancer l’API FastAPI
-Depuis la racine du projet :
+## Run the FastAPI API
+From the project root:
 uvicorn frontend.api.main:app --reload
 
-API : http://127.0.0.1:8000
-Docs : http://127.0.0.1:8000/docs
+API: http://127.0.0.1:8000  
+Docs: http://127.0.0.1:8000/docs
 
-Rôle : fournir un score de recommandation pour une interaction utilisateur–produit.
+Role: provide a recommendation score for a user–product interaction.
 
-## Lancer Streamlit
-python -m streamlit run frontend/app.py
+## Run Streamlit
+uv run streamlit run frontend/interface/__main__.py
 
-Rôle : interface de démonstration permettant de saisir des informations utilisateur / produit et d’afficher le score retourné par l’API.
+Role: demonstration interface allowing users to input user/product information and display the score returned by the API.
 
-## Logique globale
-1. L’utilisateur fournit un ensemble de produits candidats (avec leurs caractéristiques).
-3. Chaque produit est transformé en features numériques et catégorielles, identiques à celles utilisées à l’entraînement.
-4. Le modèle calcule, pour chaque produit, une probabilité d’achat (score).
-5. Les produits sont triés par score décroissant pour produire une recommandation
+## Global Logic
+1. The user provides a set of candidate products (with their features).
+2. Each product is transformed into numerical and categorical features identical to those used during training.
+3. The model computes, for each product, a purchase probability (score).
+4. Products are ranked by decreasing score to produce the recommendation.
 
-## Role des composantes
+## Component Roles
+- Model (backend): computes a relevance score for each candidate product.
+- FastAPI API: exposes the model through a scoring endpoint.
+- Streamlit interface: allows testing the system by entering products (sample_data.py) and visualizing scores and rankings.
 
-- Modèle (backend) : calcule un score de pertinence pour chaque produit candidat.
-
-- API FastAPI : expose le modèle via un endpoint de scoring.
-
-- Interface Streamlit : permet de tester le système en saisissant des produits (sample_data.py) et en visualisant les scores et le classement.

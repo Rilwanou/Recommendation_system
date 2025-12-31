@@ -2,8 +2,11 @@ __pycache__/
 *.pyc
 *.py[cod]
 *$py.class
-data/
+data/raw/*
+!data/raw/.gitkeep
+
 notebooks/
+!notebooks/.gitkeep
 .venv/
 
 .uv-cache/

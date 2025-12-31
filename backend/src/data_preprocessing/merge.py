@@ -1,37 +1,19 @@
-from __future__ import annotations
-
-from pathlib import Path
-import duckdb
-
-
-def generate_final_table_csv(
-    sql_path: Path, out_csv: Path, table_name: str = "final_table"
-) -> Path:
+def build_base_table(dfs: dict):
     """
-    Execute the merge SQL in an in-memory DuckDB and export the resulting table to CSV.
+    Construit la table principale user–item.
     """
-    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    customers = dfs["customers"]
+    orders = dfs["orders"]
+    order_items = dfs["order_items"]
+    products = dfs["products"]
+    translation = dfs["category_translation"]
 
-    with duckdb.connect(":memory:") as con:
-        con.execute(sql_path.read_text(encoding="utf-8"))
-        con.execute(f"""
-            COPY (SELECT * FROM {table_name})
-            TO '{out_csv.as_posix()}'
-            (FORMAT CSV, HEADER, DELIMITER ',');
-        """)
+    products = products.merge(translation, on="product_category_name", how="left")
 
-    return out_csv
-
-
-def main() -> None:
-    sql_path = Path("back-end/src/data_preprocessing/merge.sql")
-    out_csv = Path("data/processed/final_table.csv")
-
-    generated = generate_final_table_csv(
-        sql_path=sql_path, out_csv=out_csv, table_name="final_table"
+    df = (
+        order_items.merge(orders, on="order_id")
+        .merge(customers, on="customer_id")
+        .merge(products, on="product_id", how="left")
     )
-    print(f"✅ CSV généré: {generated}")
 
-
-if __name__ == "__main__":
-    main()
+    return df

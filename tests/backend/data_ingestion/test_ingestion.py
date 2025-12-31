@@ -21,10 +21,10 @@ def _sample_df() -> pd.DataFrame:
 class TestSaveCsvParamsValidation:
     def test_rejects_empty_filename(self, tmp_path: Path) -> None:
         with pytest.raises(ValidationError):
-            mod.SaveCsvParams(raw_dir=tmp_path, filename="")
+            mod.SaveData(raw_dir=tmp_path, filename="")
 
     def test_accepts_valid_params(self, tmp_path: Path) -> None:
-        params = mod.SaveCsvParams(raw_dir=tmp_path, filename="out.csv")
+        params = mod.SaveData(raw_dir=tmp_path, filename="out.csv")
         assert params.raw_dir == tmp_path
         assert params.filename == "out.csv"
 

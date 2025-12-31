@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -29,35 +29,43 @@ files_urls = {
 
 # Pydantic model to validate type hints before processing data
 
+
 class SaveData(BaseModel):
-    raw_dir: Path = Field(...) # Directory is required
+    raw_dir: Path = Field(...)  # Directory is required
     filename: str = Field(..., min_length=1)
 
+
 class CsvSource(BaseModel):
-    url: HttpUrl | None = Field(default=None) # URL is optional, defaults to None if not provided
-    path: Path | None = Field(default=None) # Local path
+    url: HttpUrl | None = Field(
+        default=None
+    )  # URL is optional, defaults to None if not provided
+    path: Path | None = Field(default=None)  # Local path
 
     def model_post_init(self, __context) -> None:
         # Validate that exactly one source is provided
         if (self.url is None) == (self.path is None):
             raise ValueError("Either 'url' or 'path' must be provided, but not both.")
-        
+
         # Ensure the local file exists if a path is given
         if self.path is not None and not self.path.exists():
-            raise FileNotFoundError(f"The specified CSV file does not exist: {self.path}")
+            raise FileNotFoundError(
+                f"The specified CSV file does not exist: {self.path}"
+            )
 
 
 def load_csv(source: CsvSource) -> pd.DataFrame:
     if source.url is not None:
-        logger.info(f'loading from {source.url}')
+        logger.info(f"loading from {source.url}")
         return pd.read_csv(str(source.url))
-    logger.info(f'loading from {source.path}')
+    logger.info(f"loading from {source.path}")
     return pd.read_csv(source.path)
+
 
 def save_csv(df: pd.DataFrame | None, filename: str, raw_dir: Path) -> None:
     params = SaveData(raw_dir=raw_dir, filename=filename)
 
     if df is None:
+        print(f"Skipped {filename}")
         logger.info(f"Skipped {params.filename} (df is None)")
         return
 

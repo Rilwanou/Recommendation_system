@@ -1,21 +1,32 @@
 import streamlit as st
-import requests
+from interface.load_model import load_trained_model
+from interface.sample_data import get_demo_candidates
+from interface.recommender import recommend_items
+
 
 def run_app():
-    st.title('Recommendation system')
+    st.set_page_config(page_title="Recommendation System Demo", layout="centered")
 
-    """if st.button('Load data via API'):
-        #st.write('Button')
-        with st.spinner('Loading data... Please wait'):
-            try:
-                call = requests.post('http://localhost:8000/api/ingestion/run')
-                if call.status_code == 200:
-                    st.success("Data ingested successfully")
-                    st.json(call.json())
-                else:
-                    st.error('Error API' + str(call.status_code))
-                    st.error(call.text)
-            except requests.exceptions.ConnectionError:
-                st.error('Check that FastAPI is running.')
-            except Exception as f:
-                st.error('Unexpected error')"""
+    st.title("🛒 Recommendation System – Demo")
+
+    st.markdown(
+        """
+        Cette démo montre comment le modèle recommande
+        des produits à partir de leurs caractéristiques.
+        """
+    )
+
+    # Charger le modèle
+    model = load_trained_model()
+
+    # Charger des candidats
+    candidates = get_demo_candidates()
+
+    st.subheader("Produits candidats")
+    st.dataframe(candidates)
+
+    if st.button("🔍 Recommander"):
+        recs = recommend_items(model, candidates, top_k=3)
+
+        st.subheader("📌 Recommandations")
+        st.dataframe(recs)

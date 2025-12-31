@@ -24,8 +24,8 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen --group dev --group test
 
-      - name: Lint (pre-commit)
-        run: uv run pre-commit run --all-files --show-diff-on-failure
+      - name: Lint
+        run: uv run pre-commit run --all-files
 
       - name: Tests
         env:

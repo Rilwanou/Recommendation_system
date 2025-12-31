@@ -11,4 +11,3 @@ def load_trained_model():
         raise FileNotFoundError("Modèle non trouvé. Entraîne le backend d'abord.")
 
     return joblib.load(model_path)
-

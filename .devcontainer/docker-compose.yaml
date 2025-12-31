@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: .devcontainer/backend.Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - shared_data:/app/data
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: .devcontainer/frontend.Dockerfile
+    container_name: frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    volumes:
+      - shared_data:/app/data:ro
+
+volumes:
+  shared_data:

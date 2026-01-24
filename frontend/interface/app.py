@@ -2,9 +2,9 @@ import time
 import pandas as pd
 import streamlit as st
 
-from load_model import load_trained_model
-from sample_data import get_demo_candidates
-from recommender import recommend_items
+from interface.load_model import load_trained_model
+from interface.sample_data import get_demo_candidates
+from interface.recommender import recommend_items
 
 # Plotly optionnel (sinon fallback matplotlib)
 try:

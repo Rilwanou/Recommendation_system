@@ -9,6 +9,7 @@ from recommender import recommend_items
 # Plotly optionnel (sinon fallback matplotlib)
 try:
     import plotly.express as px
+
     PLOTLY_OK = True
 except Exception:
     PLOTLY_OK = False
@@ -76,7 +77,9 @@ def sidebar_controls():
             st.info("Graphiques (Matplotlib)")
 
         st.divider()
-        st.caption("💡 Astuce: calcule les recommandations dans l’onglet **Recommandations** pour alimenter **Visualisations**.")
+        st.caption(
+            "💡 Astuce: calcule les recommandations dans l’onglet **Recommandations** pour alimenter **Visualisations**."
+        )
 
     return top_k, min_score
 
@@ -84,7 +87,9 @@ def sidebar_controls():
 def show_reco_charts(recs: pd.DataFrame):
     """Graphiques sur les recommandations."""
     if recs is None or recs.empty or "score" not in recs.columns:
-        st.info("Aucune recommandation disponible. Va dans l’onglet **Recommandations** puis clique sur **Recommander**.")
+        st.info(
+            "Aucune recommandation disponible. Va dans l’onglet **Recommandations** puis clique sur **Recommander**."
+        )
         return
 
     st.markdown("### 📊 Visualisations des recommandations")
@@ -103,7 +108,11 @@ def show_reco_charts(recs: pd.DataFrame):
                 plot_df,
                 x="rank",
                 y="score",
-                hover_data=[c for c in ["item_id", "product_category_name_english", "price"] if c in plot_df.columns],
+                hover_data=[
+                    c
+                    for c in ["item_id", "product_category_name_english", "price"]
+                    if c in plot_df.columns
+                ],
                 labels={"rank": "Rang", "score": "Score"},
             )
             st.plotly_chart(fig, use_container_width=True)
@@ -135,7 +144,11 @@ def show_reco_charts(recs: pd.DataFrame):
                 plot_df,
                 x="price",
                 y="score",
-                hover_data=[c for c in ["item_id", "product_category_name_english"] if c in plot_df.columns],
+                hover_data=[
+                    c
+                    for c in ["item_id", "product_category_name_english"]
+                    if c in plot_df.columns
+                ],
                 labels={"price": "Prix", "score": "Score"},
             )
             st.plotly_chart(fig, use_container_width=True)
@@ -153,7 +166,12 @@ def show_reco_charts(recs: pd.DataFrame):
         counts.columns = ["category", "count"]
 
         if PLOTLY_OK:
-            fig = px.bar(counts, x="category", y="count", labels={"category": "Catégorie", "count": "Nombre"})
+            fig = px.bar(
+                counts,
+                x="category",
+                y="count",
+                labels={"category": "Catégorie", "count": "Nombre"},
+            )
             st.plotly_chart(fig, use_container_width=True)
         else:
             fig, ax = plt.subplots()
@@ -178,7 +196,9 @@ def show_data_stats(candidates: pd.DataFrame):
         st.dataframe(candidates.head(50), use_container_width=True)
 
     with st.expander("📌 Types de variables", expanded=False):
-        dtypes_df = pd.DataFrame({"colonne": candidates.columns, "type": candidates.dtypes.astype(str)})
+        dtypes_df = pd.DataFrame(
+            {"colonne": candidates.columns, "type": candidates.dtypes.astype(str)}
+        )
         st.dataframe(dtypes_df, use_container_width=True)
 
     num = candidates.select_dtypes(include="number")
@@ -188,9 +208,13 @@ def show_data_stats(candidates: pd.DataFrame):
         else:
             st.dataframe(num.describe().T, use_container_width=True)
 
-            col = st.selectbox("Variable à visualiser", list(num.columns), key="num_col_select")
+            col = st.selectbox(
+                "Variable à visualiser", list(num.columns), key="num_col_select"
+            )
             if PLOTLY_OK:
-                fig = px.histogram(candidates, x=col, nbins=30, title=f"Distribution de {col}")
+                fig = px.histogram(
+                    candidates, x=col, nbins=30, title=f"Distribution de {col}"
+                )
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 fig, ax = plt.subplots()
@@ -203,7 +227,12 @@ def show_data_stats(candidates: pd.DataFrame):
                 st.markdown("##### Corrélations")
                 corr = num.corr(numeric_only=True)
                 if PLOTLY_OK:
-                    fig = px.imshow(corr, text_auto=True, aspect="auto", title="Matrice de corrélation")
+                    fig = px.imshow(
+                        corr,
+                        text_auto=True,
+                        aspect="auto",
+                        title="Matrice de corrélation",
+                    )
                     st.plotly_chart(fig, use_container_width=True)
                 else:
                     fig, ax = plt.subplots()
@@ -217,10 +246,20 @@ def show_data_stats(candidates: pd.DataFrame):
 
     if "product_category_name_english" in candidates.columns:
         with st.expander("📦 Répartition des catégories", expanded=False):
-            counts = candidates["product_category_name_english"].value_counts().head(15).reset_index()
+            counts = (
+                candidates["product_category_name_english"]
+                .value_counts()
+                .head(15)
+                .reset_index()
+            )
             counts.columns = ["category", "count"]
             if PLOTLY_OK:
-                fig = px.bar(counts, x="category", y="count", title="Top 15 catégories (candidats)")
+                fig = px.bar(
+                    counts,
+                    x="category",
+                    y="count",
+                    title="Top 15 catégories (candidats)",
+                )
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 fig, ax = plt.subplots()
@@ -294,10 +333,16 @@ def run_app():
 
         candidates_view = candidates.copy()
         if "product_category_name_english" in candidates.columns:
-            categories = ["(toutes)"] + sorted(candidates["product_category_name_english"].dropna().unique().tolist())
-            chosen_cat = st.selectbox("Filtrer par catégorie", categories, index=0, key="cat_filter")
+            categories = ["(toutes)"] + sorted(
+                candidates["product_category_name_english"].dropna().unique().tolist()
+            )
+            chosen_cat = st.selectbox(
+                "Filtrer par catégorie", categories, index=0, key="cat_filter"
+            )
             if chosen_cat != "(toutes)":
-                candidates_view = candidates[candidates["product_category_name_english"] == chosen_cat].copy()
+                candidates_view = candidates[
+                    candidates["product_category_name_english"] == chosen_cat
+                ].copy()
 
         col_left, col_right = st.columns([1.25, 1])
         with col_left:
@@ -307,7 +352,12 @@ def run_app():
             st.subheader("Actions")
             st.write("Paramètres actuels:")
             st.code(f"Top-K = {top_k}\nScore min = {min_score}", language="text")
-            run_btn = st.button("🔍 Recommander", use_container_width=True, type="primary", key="run_btn")
+            run_btn = st.button(
+                "🔍 Recommander",
+                use_container_width=True,
+                type="primary",
+                key="run_btn",
+            )
 
         if run_btn:
             with st.spinner("Calcul des recommandations..."):
@@ -345,7 +395,9 @@ def run_app():
                     key="download_btn",
                 )
 
-                st.info("👉 Va dans l’onglet **Visualisations** pour analyser les scores.")
+                st.info(
+                    "👉 Va dans l’onglet **Visualisations** pour analyser les scores."
+                )
 
     # Visualisations
     with tab_viz:

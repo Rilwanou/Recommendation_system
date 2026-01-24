@@ -80,7 +80,7 @@ Docs: http://127.0.0.1:8000/docs
 Role: provide a recommendation score for a user–product interaction.
 
 ## Run Streamlit
-uv run streamlit run frontend/__main__.py
+uv run streamlit run frontend/interface/app.py
 
 Role: demonstration interface allowing users to input user/product information and display the score returned by the API.
 

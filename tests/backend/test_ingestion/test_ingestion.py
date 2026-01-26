@@ -6,11 +6,9 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
+
 root = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(root))
-
-
-
 
 from backend.src.services import ingestion as mod
 

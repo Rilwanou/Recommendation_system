@@ -35,11 +35,11 @@ def recommend_items(model, customer_profile, products_df, top_k=5):
 
     # 2. Conserver les infos pour l'affichage final
     product_ids = candidates_df["product_id"].copy()
-    product_categories = (
-        candidates_df["product_category_name_english"].copy()
-        if "product_category_name_english" in candidates_df.columns
-        else None
-    )
+    # product_categories = (
+    #    candidates_df["product_category_name_english"].copy()
+    #    if "product_category_name_english" in candidates_df.columns
+    #    else None
+    # )
     product_prices = (
         candidates_df["price"].copy() if "price" in candidates_df.columns else None
     )

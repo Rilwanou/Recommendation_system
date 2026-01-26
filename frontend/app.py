@@ -6,6 +6,7 @@ from api_client import get_api_client
 # Plotly optionnel
 try:
     import plotly.express as px
+
     PLOTLY_OK = True
 except Exception:
     PLOTLY_OK = False
@@ -103,8 +104,10 @@ def show_reco_charts(recs: pd.DataFrame):
         st.markdown("#### Distribution des scores")
         if PLOTLY_OK:
             fig = px.histogram(
-                plot_df, x="purchase_probability", nbins=15, 
-                labels={"purchase_probability": "Score"}
+                plot_df,
+                x="purchase_probability",
+                nbins=15,
+                labels={"purchase_probability": "Score"},
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
@@ -179,24 +182,29 @@ def run_app():
     # ⚠️ VÉRIFICATION CRITIQUE : Backend doit être lancé
     with st.spinner("Connexion au backend..."):
         health = api_client.health_check()
-    
+
     # Sidebar avec status
     top_k, min_score = sidebar_controls(health)
-    
+
     # ❌ Bloquer l'app si backend non disponible
     if health["status"] != "healthy":
-        st.error("⚠️ **Le backend n'est pas disponible ou n'a pas démarré correctement**")
-        
+        st.error(
+            "⚠️ **Le backend n'est pas disponible ou n'a pas démarré correctement**"
+        )
+
         st.markdown("### 🔧 Pour démarrer le backend :")
-        st.code("""
+        st.code(
+            """
 cd backend
 uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
-        """, language="bash")
-        
+        """,
+            language="bash",
+        )
+
         st.markdown("### 📝 Détails de l'erreur :")
         if "error" in health:
             st.error(health["error"])
-        
+
         st.info("Une fois le backend démarré, rechargez cette page (F5 ou Ctrl+R)")
         st.stop()  # ⛔ Arrêter complètement l'exécution
 
@@ -219,7 +227,7 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
         # Récupérer la liste des clients
         with st.spinner("Chargement des clients..."):
             customers = api_client.get_customers()
-        
+
         if not customers:
             st.error("Aucun client disponible dans la base de données.")
             st.stop()
@@ -227,35 +235,32 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
         # Sélection du client
         st.markdown("### 1️⃣ Sélection du client")
         selected_customer = st.selectbox(
-            "Choisissez un client",
-            options=customers,
-            index=0,
-            key="customer_select"
+            "Choisissez un client", options=customers, index=0, key="customer_select"
         )
 
         if selected_customer:
             st.session_state["selected_customer"] = selected_customer
-            
+
             # Récupérer le profil via API
             with st.spinner("Récupération du profil..."):
                 profile = api_client.get_customer_profile(selected_customer)
-            
+
             if profile is None:
                 st.error("Impossible de récupérer le profil du client.")
                 st.stop()
-            
+
             # Affichage du profil
             st.markdown("### 2️⃣ Profil client")
             st.success(f"✅ Client **{selected_customer}** sélectionné")
-            
+
             with st.expander("Voir les détails du profil", expanded=False):
                 col1, col2 = st.columns(2)
-                
+
                 with col1:
                     st.markdown("**Informations géographiques**")
                     st.text(f"État: {profile.get('customer_state', 'N/A')}")
                     st.text(f"Ville: {profile.get('customer_city', 'N/A')}")
-                
+
                 with col2:
                     st.markdown("**Informations comportementales**")
                     st.text(f"Achats totaux: {profile.get('purchase_count', 0)}")
@@ -264,7 +269,7 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 
             # Recommandations
             st.markdown("### 3️⃣ Générer les recommandations")
-            
+
             run_btn = st.button(
                 "🔍 Lancer la recommandation",
                 use_container_width=True,
@@ -275,14 +280,14 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
             if run_btn:
                 with st.spinner("Calcul des recommandations en cours..."):
                     t0 = time.time()
-                    
+
                     # Appel API
                     result = api_client.generate_recommendations(
                         customer_unique_id=selected_customer,
                         n_recommendations=top_k,
-                        min_score=min_score
+                        min_score=min_score,
                     )
-                    
+
                     dt = time.time() - t0
 
                 if result is None:
@@ -297,7 +302,9 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 
                 st.markdown("### 📌 Résultats")
                 if recs_df.empty:
-                    st.warning("Aucune recommandation ne passe le filtre de score minimum.")
+                    st.warning(
+                        "Aucune recommandation ne passe le filtre de score minimum."
+                    )
                 else:
                     best = recs_df.iloc[0]
                     c1, c2, c3 = st.columns(3)
@@ -316,7 +323,9 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
                         key="download_btn",
                     )
 
-                    st.info("👉 Va dans l'onglet **Visualisations** pour analyser les scores.")
+                    st.info(
+                        "👉 Va dans l'onglet **Visualisations** pour analyser les scores."
+                    )
 
     # Visualisations
     with tab_viz:

@@ -1,7 +1,21 @@
 import time
 import pandas as pd
 import streamlit as st
+from pathlib import Path
 from api_client import get_api_client
+from analysis import (
+    plot_price,
+    plot_top_categories,
+    plot_top_cities,
+    plot_length_vs_price,
+)
+
+
+@st.cache_data(show_spinner=False)
+def load_final_data():
+    root = Path(__file__).resolve().parents[1]
+    csv_path = root / "data" / "processed" / "final_data.csv"
+    return pd.read_csv(csv_path)
 
 # Plotly optionnel
 try:
@@ -297,9 +311,10 @@ uvicorn backend.src.api.main:app --reload
     st.success("✅ Backend connecté et opérationnel")
 
     # Onglets
-    tab_home, tab_rec, tab_viz = st.tabs(
-        ["🏠 Accueil", "🎯 Recommandations", "📊 Visualisations"]
+    tab_home, tab_rec, tab_viz, tab_analysis = st.tabs(
+    ["🏠 Accueil", "🎯 Recommandations", "📊 Visualisations", "📈 Analyse dataset"]
     )
+
 
     with tab_home:
         accueil_section()
@@ -426,7 +441,26 @@ uvicorn backend.src.api.main:app --reload
 
     with tab_viz:
         show_reco_charts(st.session_state["recs"])
+    
+    with tab_analysis:
+        st.markdown("## 📈 Analyse du dataset")
 
+        # charge ton CSV (adapte le chemin si besoin)
+        data = load_final_data()
+
+        if not PLOTLY_OK:
+            st.warning("Plotly n'est pas disponible.")
+            st.stop()
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+            st.plotly_chart(plot_price(data), use_container_width=True)
+            st.plotly_chart(plot_top_categories(data, n=15), use_container_width=True)
+
+        with c2:
+            st.plotly_chart(plot_top_cities(data, n=15), use_container_width=True)
+            st.plotly_chart(plot_length_vs_price(data), use_container_width=True)
 
 if __name__ == "__main__":
     run_app()

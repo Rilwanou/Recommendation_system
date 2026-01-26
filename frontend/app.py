@@ -17,6 +17,7 @@ def load_final_data():
     csv_path = root / "data" / "processed" / "final_data.csv"
     return pd.read_csv(csv_path)
 
+
 # Plotly optionnel
 try:
     import plotly.express as px
@@ -312,9 +313,8 @@ uvicorn backend.src.api.main:app --reload
 
     # Onglets
     tab_home, tab_rec, tab_viz, tab_analysis = st.tabs(
-    ["🏠 Accueil", "🎯 Recommandations", "📊 Visualisations", "📈 Analyse dataset"]
+        ["🏠 Accueil", "🎯 Recommandations", "📊 Visualisations", "📈 Analyse dataset"]
     )
-
 
     with tab_home:
         accueil_section()
@@ -441,7 +441,7 @@ uvicorn backend.src.api.main:app --reload
 
     with tab_viz:
         show_reco_charts(st.session_state["recs"])
-    
+
     with tab_analysis:
         st.markdown("## 📈 Analyse du dataset")
 
@@ -461,6 +461,7 @@ uvicorn backend.src.api.main:app --reload
         with c2:
             st.plotly_chart(plot_top_cities(data, n=15), use_container_width=True)
             st.plotly_chart(plot_length_vs_price(data), use_container_width=True)
+
 
 if __name__ == "__main__":
     run_app()

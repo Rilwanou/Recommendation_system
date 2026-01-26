@@ -15,6 +15,7 @@ class APIClient:
     
     def __init__(self, base_url: str = "http://localhost:8000/api/v1"):
         self.base_url = base_url
+
     
     def health_check(self) -> Dict:
         """Vérifie l'état de santé de l'API"""
@@ -22,6 +23,13 @@ class APIClient:
             response = requests.get(f"{self.base_url}/health", timeout=5)
             response.raise_for_status()
             return response.json()
+        except requests.exceptions.ConnectionError:
+            return {
+                "status": "error",
+                "model_loaded": False,
+                "data_loaded": False,
+                "error": "Backend non accessible. Assurez-vous qu'il est démarré sur http://localhost:8000/api/v1"
+            }
         except requests.exceptions.RequestException as e:
             return {
                 "status": "error",
@@ -52,17 +60,6 @@ class APIClient:
         except requests.exceptions.RequestException as e:
             st.error(f"Erreur lors de la récupération du profil: {e}")
             return None
-    
-    def get_products(self) -> pd.DataFrame:
-        """Récupère tous les produits disponibles"""
-        try:
-            response = requests.get(f"{self.base_url}/products", timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            return pd.DataFrame(data["products"])
-        except requests.exceptions.RequestException as e:
-            st.error(f"Erreur lors de la récupération des produits: {e}")
-            return pd.DataFrame()
     
     def generate_recommendations(
         self,

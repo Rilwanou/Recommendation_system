@@ -29,6 +29,20 @@ def hero(show_client_hint=False):
     st.write("")
 
 
+def short_id(value: str, start: int = 6, end: int = 4) -> str:
+    """
+    Raccourcit un identifiant long pour l'affichage.
+    Exemple: abcdef1234567890 -> abcdef…7890
+    """
+    if not value or not isinstance(value, str):
+        return str(value)
+
+    if len(value) <= start + end + 1:
+        return value
+
+    return f"{value[:start]}…{value[-end:]}"
+
+
 def kpi_box(title: str, value: str):
     with st.container(border=True):
         st.caption(title)

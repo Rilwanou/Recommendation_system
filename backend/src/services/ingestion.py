@@ -51,7 +51,8 @@ class CsvSource(BaseModel):
             raise FileNotFoundError(
                 f"The specified CSV file does not exist: {self.path}"
             )
-        
+
+
 def load_data_raw(raw_dir: Path) -> dict[str, pd.DataFrame]:
     raw_dir = Path(raw_dir)
 

@@ -3,17 +3,17 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, average_precision_score
 
-from src.services.ingestion import load_data_raw
-from src.data_preprocessing.merge import build_base_table
-from src.data_preprocessing.features import (
+from backend.src.services.ingestion import load_data_raw
+from backend.src.data_preprocessing.merge import build_base_table
+from backend.src.data_preprocessing.features import (
     add_recency,
     add_item_popularity,
     add_item_popularity_state,
 )
-from src.data_preprocessing.negative_sampling import generate_negative_samples
-from src.models.preprocessing import build_preprocessor
-from src.models.train import train_model
-from src.models.save_load import save_model
+from backend.src.data_preprocessing.negative_sampling import generate_negative_samples
+from backend.src.models.preprocessing import build_preprocessor
+from backend.src.models.train import train_model
+from backend.src.models.save_load import save_model
 
 
 # ===============================

@@ -11,7 +11,7 @@ from src.data_preprocessing.features import (
 from src.data_preprocessing.negative_sampling import generate_negative_samples
 
 
-# Chemins
+# Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 RAW_DATA_DIR = BASE_DIR / "data" / "raw"
 PROCESSED_DATA_PATH = BASE_DIR / "data" / "processed" / "final_dataset.parquet"
@@ -20,10 +20,10 @@ PROCESSED_DATA_PATH = BASE_DIR / "data" / "processed" / "final_dataset.parquet"
 def run_full_preprocessing():
     print("🚀 Démarrage du pipeline de traitement...")
 
-    # 1. Chargement
+    # 1. Loading
     dfs = load_data_raw(RAW_DATA_DIR)
 
-    # 2. Merge & Nettoyage de base
+    # 2. Merge & Base Cleaning
     df = build_base_table(dfs)
     df = create_positive_labels(df)
 
@@ -33,11 +33,11 @@ def run_full_preprocessing():
     df = add_item_popularity(df)
     df = add_item_popularity_state(df)
 
-    # 4. Negative Sampling (Transformation pour le ML)
+    # 4. Negative Sampling (Transformation for ML)
     print("🧪 Génération des échantillons négatifs...")
     df_final = generate_negative_samples(df, neg_ratio=1)
 
-    # 5. Sauvegarde
+    # 5. save processed data
     PROCESSED_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
     df_final.to_parquet(PROCESSED_DATA_PATH, index=False)
 

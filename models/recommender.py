@@ -4,36 +4,36 @@ import numpy as np
 
 def recommend_items(model, customer_profile, products_df, top_k=5):
     """
-    Recommande des produits pour un client donné.
+    Recommends products for a specific customer.
 
     Args:
-        model: Le modèle entraîné (classifier avec pipeline)
-        customer_profile: dict contenant les caractéristiques du client
-        products_df: DataFrame contenant tous les produits disponibles
-        top_k: Nombre de recommandations à retourner
+        model: The trained model (classifier with pipeline)
+        customer_profile: dict containing customer characteristics
+        products_df: DataFrame containing all available products
+        top_k: Number of recommendations to return
 
     Returns:
-        DataFrame avec les top_k produits recommandés et leurs scores
+        DataFrame with the top_k recommended products and their scores
     """
 
-    # 1. Créer un DataFrame de candidats en combinant profil client + chaque produit
+    # 1. Create a candidates DataFrame by combining customer profile + each product
     candidates = []
 
     for idx, product in products_df.iterrows():
-        # Combiner le profil client avec les caractéristiques du produit
+        # Combine the customer profile with the product characteristics
         candidate = {}
 
-        # Ajouter les caractéristiques du client
+        # Add the customer characteristics
         candidate.update(customer_profile)
 
-        # Ajouter les caractéristiques du produit
+        # Add the product characteristics
         candidate.update(product.to_dict())
 
         candidates.append(candidate)
 
     candidates_df = pd.DataFrame(candidates)
 
-    # 2. Conserver les infos pour l'affichage final
+    # 2. Save information for final display
     product_ids = candidates_df["product_id"].copy()
     # product_categories = (
     #    candidates_df["product_category_name_english"].copy()
@@ -44,13 +44,13 @@ def recommend_items(model, customer_profile, products_df, top_k=5):
         candidates_df["price"].copy() if "price" in candidates_df.columns else None
     )
 
-    # 3. Préparer X pour le modèle
-    # IMPORTANT : Ne supprimer QUE les IDs et le label
-    # Le pipeline du modèle gère lui-même l'encodage des variables catégorielles
+    # 3. Prepare X for the model
+    # IMPORTANT: Delete ONLY the IDs and the label.
+    # The model pipeline handles categorical variable encoding itself
     cols_to_drop = [
-        "customer_unique_id",  # ID client
-        "product_id",  # ID produit
-        "label",  # Target (si présente)
+        "customer_unique_id",  # customer ID
+        "product_id",  # Product ID
+        "label",  # Target (if present)
     ]
 
     X = candidates_df.drop(
@@ -58,28 +58,30 @@ def recommend_items(model, customer_profile, products_df, top_k=5):
         errors="ignore",
     )
 
-    # 4. Remplacer les NaN par des valeurs appropriées
+    # 4. Replace NaNs with appropriate values
     X = X.fillna(0)
 
-    # 5. Prédiction des scores
+    # 5. Prediction of scores
     try:
-        scores = model.predict_proba(X)[:, 1]  # Probabilité classe positive (achat)
+        scores = model.predict_proba(X)[
+            :, 1
+        ]  # Probability of positive class (purchase)
     except Exception as e:
         print(f"Erreur lors de la prédiction: {e}")
         print(f"Colonnes dans X: {X.columns.tolist()}")
         print(f"Shape de X: {X.shape}")
         print(f"Types de X:\n{X.dtypes}")
-        # Fallback : scores aléatoires
+        # Fallback: random scores
         scores = np.random.rand(len(X))
 
-    # 6. Créer le DataFrame de résultats
+    # 6. Create the results DataFrame
     results = pd.DataFrame({"product_id": product_ids, "score": scores})
 
-    # Ajouter seulement le prix (pas la catégorie)
+    # Add only the price (not the category)
     if product_prices is not None:
         results["price"] = product_prices.values
 
-    # 7. Trier par score décroissant et retourner le top-k
+    # 7. Sort by score descending and return the top-k
     results = results.sort_values("score", ascending=False).head(top_k)
 
     return results.reset_index(drop=True)
@@ -87,14 +89,13 @@ def recommend_items(model, customer_profile, products_df, top_k=5):
 
 def get_customer_statistics(df, customer_unique_id):
     """
-    Retourne des statistiques sur les achats du client.
+    Returns statistics on the customer's purchases.
 
     Args:
-        df: DataFrame complet
-        customer_unique_id: ID unique du client
-
+        df: Complete DataFrame
+        customer_unique_id: Unique ID of the customer
     Returns:
-        dict avec statistiques
+        dict with statistics
     """
     customer_data = df[df["customer_unique_id"] == customer_unique_id]
 

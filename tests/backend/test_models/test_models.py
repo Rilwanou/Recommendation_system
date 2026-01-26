@@ -20,16 +20,16 @@ from backend.src.models.train import train_model
 from backend.src.models.save_load import save_model
 
 # =====================================
-# Ajouter la racine du projet au path
+# Add the project root to the path
 # =====================================
 
 
 def _sample_df_raw(tmp_path: Path) -> Path:
-    """Créer un dataset fictif suffisamment grand pour 5-fold CV"""
+    """Create a fake dataset large enough for 5-fold CV"""
     data_dir = tmp_path / "data_raw"
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    n = 10  # 10 clients × 10 produits → 100 lignes après merge
+    n = 10  # 10 customers × 10 products → 100 lines after merging
     # Customers
     pd.DataFrame(
         {
@@ -127,7 +127,7 @@ def _sample_df_raw(tmp_path: Path) -> Path:
         }
     ).to_csv(data_dir / "olist_order_payments_dataset.csv", index=False)
 
-    # Geolocation (optionnel pour tests)
+    # Geolocation
     pd.DataFrame(
         {
             "order_id": [f"o{i}" for i in range(n)],
@@ -185,7 +185,7 @@ class TestNegativeSampling:
         df = add_item_popularity(df)
         df = add_item_popularity_state(df)
 
-        # On génère les labels négatifs
+        # We generate negative labels
         df_ml = generate_negative_samples(df, neg_ratio=1)
 
         assert "label" in df_ml.columns
@@ -229,7 +229,7 @@ class TestFullPipeline:
         preprocessor = build_preprocessor(num_features, cat_features)
         model = train_model(preprocessor, X, y)
 
-        # Sauvegarde
+        # save model
         model_path = tmp_path / "model.joblib"
         save_model(model, model_path)
 

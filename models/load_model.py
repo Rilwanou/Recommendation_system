@@ -3,10 +3,10 @@ import joblib
 
 
 def load_trained_model():
-    """Charge le modèle entraîné depuis le backend."""
+    """Loads the trained model from the backend."""
     model_path = Path(__file__).resolve().parent / "logistic_ridge.joblib"
 
     if not model_path.exists():
-        raise FileNotFoundError(f"Modèle non trouvé : {model_path}")
+        raise FileNotFoundError(f"Model not found: {model_path}")
 
     return joblib.load(model_path)

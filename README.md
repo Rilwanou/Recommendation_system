@@ -1,97 +1,194 @@
-# Recommendation System – Data Mining Project
+# 🚀 Recommendation System – FastAPI & Streamlit  
 
-## Objective
-Propose a simple and interpretable recommendation system that assigns a relevance score to each (user, product) pair.
-This score represents the probability that a user will purchase a product, based on product features, user context, and signals derived from purchase history.
+**Architecture découplée • Modèle ML centralisé • Dépendances gérées avec uv**
 
-The system relies on the idea that products bought together or by similar customers are more likely to be purchased again by other customers.
+---
 
-## Data
-Olist dataset:
-- customers
-- orders (delivered only)
-- order items
-- products
-- category name translation
+## 🧠 Objectif
 
-## Feature Engineering
-Each (user, product) interaction is described by:
+Ce projet implémente un **système de recommandation simple et interprétable** :
 
-### Numerical Features
-- price
-- product_photos_qty
-- product_weight_g
-- product_length_cm
-- product_height_cm
-- product_width_cm
-- purchase_count (global product popularity)
-- purchase_count_state (local popularity by state)
-- recency_days (purchase recency)
+- Attribue un **score de pertinence** à chaque paire (utilisateur, produit)  
+- Le score représente la **probabilité d’achat**, basé sur :  
+  - Caractéristiques du produit  
+  - Contexte utilisateur  
+  - Signaux dérivés de l’historique d’achats
 
-### Categorical Features
-- customer_state
-- customer_city
+Le système exploite l’idée que **les produits achetés ensemble ou par des clients similaires** sont plus susceptibles d’être achetés à nouveau.
+
+---
+
+## 🗂 Dataset
+
+Olist dataset :
+
+- Customers  
+- Orders (livrés uniquement)  
+- Order items  
+- Products  
+- Category name translation
+
+---
+
+## 🔍 Feature Engineering
+
+Chaque interaction (user, product) est décrite par :
+
+### Numériques
+- price  
+- product_photos_qty  
+- product_weight_g  
+- product_length_cm  
+- product_height_cm  
+- product_width_cm  
+- purchase_count (popularité globale)  
+- purchase_count_state (popularité locale par État)  
+- recency_days (récence de l’achat)
+
+### Catégorielles
+- customer_state  
+- customer_city  
 - product_category_name_english
 
-### Relational Signal
-- cooc_score (product–product co-occurrence within the same basket)
+### Signaux relationnels
+- cooc_score (co-occurrence produit–produit dans le même panier)
 
-## Labels (Data Mining)
-- Label = 1: observed interaction (purchase)
-- Label = 0: non-observed interaction (negative sampling)
-Positive / negative ratio = 1:1.
+---
 
-This is an implicit-feedback recommendation problem (ranking), not a classical classification task.
+## 🎯 Labels (Data Mining)
 
-## Preprocessing
-- Numerical: median imputation + standardization
-- Categorical: "missing" imputation + OneHotEncoder
+- 1 → Interaction observée (achat)  
+- 0 → Interaction non observée (negative sampling)  
+- Ratio positif/négatif = 1:1  
 
-## Model
-- Logistic regression with L2 regularization (Ridge)
-- C selection via cross-validation
-- Final model: C = 0.05
-- Metrics: ROC-AUC, PR-AUC (Average Precision)
+> C’est un problème de **ranking / implicit-feedback**, pas une classification classique.
 
-## Architecture
-backend/
-  src/
-    data_ingestion/
-    data_preprocessing/
-    modeling/
+---
 
-frontend/
-  app.py          # Streamlit
-  api/            # FastAPI
+## ⚙ Preprocessing
 
-models/
-  logistic_ridge.joblib
+- Numériques : median imputation + standardization  
+- Catégorielles : imputation "missing" + OneHotEncoder
 
-notebooks/
-  exploration.ipynb
+---
 
-## Run the FastAPI API
-From the project root:
-uvicorn frontend.api.main:app --reload
+## 🧮 Modèle ML
 
-API: http://127.0.0.1:8000  
-Docs: http://127.0.0.1:8000/docs
+- Logistic Regression avec régularisation L2 (Ridge)  
+- Sélection de C via cross-validation  
+- Modèle final : C = 0.05  
+- Metrics : ROC-AUC, PR-AUC (Average Precision)
 
-Role: provide a recommendation score for a user–product interaction.
+---
 
-## Run Streamlit
-uv run streamlit run frontend/interface/app.py
+## 🏗 Architecture du projet
 
-Role: demonstration interface allowing users to input user/product information and display the score returned by the API.
+project/
+├── backend/
+│ ├── src/
+│ │ ├── api/
+│ │ │ ├── main.py # Point d’entrée FastAPI
+│ │ │ └── router.py # Routes API (v1)
+│ │ ├── services/
+│ │ │ ├── ingestion.py # Pipeline ingestion
+│ │ │ └── schemas.py # Schémas Pydantic
+│ │ └── init.py
+│ └── pyproject.toml # Dépendances backend (uv)
+│
+├── frontend/
+│ ├── interface/
+│ │ ├── app.py # Application Streamlit
+│ │ └── api_client.py # Client HTTP
+│ └── pyproject.toml # Dépendances frontend (uv)
+│
+├── models/
+│ ├── load_data.py # Chargement dataset
+│ ├── load_model.py # Chargement modèle ML
+│ ├── recommender.py # Algorithme recommandations
+│ └── logistic_ridge.joblib # Modèle entraîné
+│
+├── data/
+│ └── processed/
+│ └── final_dataset.parquet
+│
+├── notebooks/
+│ └── exploration.ipynb # Exploration data & features
+│
+└── README.md
 
-## Global Logic
-1. The user provides a set of candidate products (with their features).
-2. Each product is transformed into numerical and categorical features identical to those used during training.
-3. The model computes, for each product, a purchase probability (score).
-4. Products are ranked by decreasing score to produce the recommendation.
+---
 
-## Component Roles
-- Model (backend): computes a relevance score for each candidate product.
-- FastAPI API: exposes the model through a scoring endpoint.
-- Streamlit interface: allows testing the system by entering products (sample_data.py) and visualizing scores and rankings.
+## 🔄 Flux global
+
+Dans l’interface Streamlit, l’utilisateur sélectionne un client existant.
+
+Le frontend envoie la requête HTTP au backend (FastAPI).
+
+Le backend récupère automatiquement :
+
+Toutes les variables/features nécessaires pour le modèle depuis le dataset
+
+Les produits candidats pour ce client
+
+Le modèle calcule la probabilité d’achat (score) pour chaque produit candidat.
+
+Les produits sont classés par score décroissant.
+
+Le backend retourne le JSON des recommandations.
+
+Le frontend affiche la liste des produits recommandés à l’utilisateur.
+
+✅ L’utilisateur n’a pas à manipuler les features ou les produits : tout est généré automatiquement à partir du client sélectionné.
+
+
+---
+
+
+## 📦 Installation et lancement (backend + frontend)
+
+### 1️⃣ Cloner le projet
+
+```bash
+git clone git@github.com:ril-hub46/Recommendation_system.git
+cd Recommendation_system
+uv sync
+```
+
+
+### 2️⃣ Lancer le backend
+```
+uvicorn backend.src.api.main:app --reload
+```
+API : http://localhost:8000
+Swagger : http://localhost:8000/docs
+
+
+### 3️⃣ Lancer le frontend
+```
+uv run streamlit run frontend/app.py
+```
+Interface : http://localhost:8501
+
+Utilisateur
+   ↓
+Frontend (Streamlit)
+   ↓ Requêtes HTTP
+Backend (FastAPI)
+   ↓
+Chargement modèle & données (cache)
+   ↓
+Calcul des scores
+   ↓
+Réponse JSON
+   ↑
+Frontend (visualisation)
+
+### 4️⃣ Pour entrainer le modèle
+```bash
+uv run python backend/train_logit.py
+```
+
+
+
+
 

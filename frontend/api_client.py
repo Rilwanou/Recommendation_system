@@ -1,7 +1,7 @@
 """
 frontend/interface/api_client.py
 
-Client pour communiquer avec l'API FastAPI backend
+Client for communicating with the FastAPI backend API
 """
 
 import requests
@@ -10,13 +10,13 @@ from typing import List, Dict, Optional
 
 
 class APIClient:
-    """Client pour l'API de recommandation"""
+    """Client for the recommendation API"""
 
     def __init__(self, base_url: str = "http://localhost:8000/api/v1"):
         self.base_url = base_url
 
     def health_check(self) -> Dict:
-        """Vérifie l'état de santé de l'API"""
+        """Checks the health status of the API"""
         try:
             response = requests.get(f"{self.base_url}/health", timeout=5)
             response.raise_for_status()
@@ -26,7 +26,7 @@ class APIClient:
                 "status": "error",
                 "model_loaded": False,
                 "data_loaded": False,
-                "error": "Backend non accessible. Assurez-vous qu'il est démarré sur http://localhost:8000/api/v1",
+                "error": "Backend not accessible. Ensure that it is started on http://localhost:8000/api/v1",
             }
         except requests.exceptions.RequestException as e:
             return {
@@ -37,17 +37,17 @@ class APIClient:
             }
 
     def get_customers(self) -> List[str]:
-        """Récupère la liste des clients"""
+        """Retrieve the list of customers"""
         try:
             response = requests.get(f"{self.base_url}/customers", timeout=10)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            st.error(f"Erreur lors de la récupération des clients: {e}")
+            st.error(f"Error retrieving clients: {e}")
             return []
 
     def get_customer_profile(self, customer_unique_id: str) -> Optional[Dict]:
-        """Récupère le profil d'un client"""
+        """Retrieve the profile of a customer"""
         try:
             response = requests.get(
                 f"{self.base_url}/customers/{customer_unique_id}", timeout=10
@@ -55,7 +55,7 @@ class APIClient:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            st.error(f"Erreur lors de la récupération du profil: {e}")
+            st.error(f"Error retrieving customer profile: {e}")
             return None
 
     def generate_recommendations(
@@ -64,7 +64,7 @@ class APIClient:
         n_recommendations: int = 10,
         min_score: float = 0.0,
     ) -> Optional[Dict]:
-        """Génère des recommandations pour un client"""
+        """Generate recommendations for a customer"""
         try:
             payload = {
                 "customer_unique_id": customer_unique_id,
@@ -78,11 +78,11 @@ class APIClient:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            st.error(f"Erreur lors de la génération des recommandations: {e}")
+            st.error(f"Error generating recommendations: {e}")
             return None
 
 
 @st.cache_resource
 def get_api_client() -> APIClient:
-    """Retourne une instance du client API (cached)"""
+    """Returns a cached instance of the API client"""
     return APIClient()

@@ -168,9 +168,12 @@ def accueil_section():
         "et générer vos premières recommandations."
     )
 
+
 def show_reco_charts(recs: pd.DataFrame):
     if recs is None or recs.empty or "purchase_probability" not in recs.columns:
-        st.info("Aucune recommandation à visualiser. Génère d’abord des recommandations.")
+        st.info(
+            "Aucune recommandation à visualiser. Génère d’abord des recommandations."
+        )
         return
 
     st.markdown("## 📊 Visualisations des recommandations")
@@ -221,7 +224,9 @@ def show_reco_charts(recs: pd.DataFrame):
             ax.set_ylabel("Fréquence")
             st.pyplot(fig)
 
-        st.caption(f"📌 Score médian : **{plot_df['purchase_probability'].median():.3f}**")
+        st.caption(
+            f"📌 Score médian : **{plot_df['purchase_probability'].median():.3f}**"
+        )
 
     st.write("")
     st.markdown("### Score vs Prix")
@@ -248,7 +253,9 @@ def show_reco_charts(recs: pd.DataFrame):
             f"💡 Score moyen (3 moins chers) **{cheap:.3f}** vs (3 plus chers) **{expensive:.3f}**"
         )
     else:
-        st.info("La colonne `price` n’est pas disponible pour ce jeu de recommandations.")
+        st.info(
+            "La colonne `price` n’est pas disponible pour ce jeu de recommandations."
+        )
 
 
 # -----------------------
@@ -324,7 +331,9 @@ def run_app():
                 st.write(f"- Récence : **{profile.get('recency_days', 0)}** jours")
             with c2:
                 st.markdown("**Signal modèle**")
-                st.write(f"- Score cooc : **{float(profile.get('cooc_score', 0)):.3f}**")
+                st.write(
+                    f"- Score cooc : **{float(profile.get('cooc_score', 0)):.3f}**"
+                )
 
         st.markdown("### 3️⃣ Générer les recommandations")
         run_btn = st.button(
@@ -359,17 +368,27 @@ def run_app():
 
         st.markdown("### 📌 Résultats")
         if recs_df is None:
-            st.info("Clique sur **Lancer la recommandation** pour afficher les résultats.")
+            st.info(
+                "Clique sur **Lancer la recommandation** pour afficher les résultats."
+            )
         elif recs_df.empty:
             st.warning("Aucune recommandation ne passe le filtre de score minimum.")
         else:
             best = recs_df.iloc[0]
             m1, m2, m3 = st.columns(3)
-            m1.metric("Top recommandé", short_id(str(best.get("product_id", "")), 10, 6))
-            m2.metric("Score (Top 1)", f"{float(best.get('purchase_probability', 0.0)):.4f}")
+            m1.metric(
+                "Top recommandé", short_id(str(best.get("product_id", "")), 10, 6)
+            )
+            m2.metric(
+                "Score (Top 1)", f"{float(best.get('purchase_probability', 0.0)):.4f}"
+            )
             m3.metric("Prix (Top 1)", f"{float(best.get('price', 0.0)):.2f}€")
 
-            show_cols = [c for c in ["rank", "product_id", "price", "purchase_probability"] if c in recs_df.columns]
+            show_cols = [
+                c
+                for c in ["rank", "product_id", "price", "purchase_probability"]
+                if c in recs_df.columns
+            ]
             st.dataframe(recs_df[show_cols], use_container_width=True)
 
             st.download_button(

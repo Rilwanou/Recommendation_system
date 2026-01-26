@@ -83,38 +83,38 @@ Chaque interaction (user, product) est décrite par :
 
 ## 🏗 Architecture du projet
 ```
-      project/
-      ├── backend/
-      │ ├── src/
-      │ │ ├── api/
-      │ │ │ ├── main.py # Point d’entrée FastAPI
-      │ │ │ └── router.py # Routes API (v1)
-      │ │ ├── services/
-      │ │ │ ├── ingestion.py # Pipeline ingestion
-      │ │ │ └── schemas.py # Schémas Pydantic
-      │ │ └── init.py
-      │ └── pyproject.toml # Dépendances backend (uv)
-      │
-      ├── frontend/
-      │ ├── interface/
-      │ │ ├── app.py # Application Streamlit
-      │ │ └── api_client.py # Client HTTP
-      │ └── pyproject.toml # Dépendances frontend (uv)
-      │
-      ├── models/
-      │ ├── load_data.py # Chargement dataset
-      │ ├── load_model.py # Chargement modèle ML
-      │ ├── recommender.py # Algorithme recommandations
-      │ └── logistic_ridge.joblib # Modèle entraîné
-      │
-      ├── data/
-      │ └── processed/
-      │ └── final_dataset.parquet
-      │
-      ├── notebooks/
-      │ └── exploration.ipynb # Exploration data & features
-      │
-      └── README.md
+project/
+├── backend/
+│   ├── src/
+│   │   ├── api/
+│   │   │   ├── main.py        # Point d’entrée FastAPI
+│   │   │   └── router.py      # Routes API (v1)
+│   │   ├── services/
+│   │   │   ├── ingestion.py   # Pipeline ingestion
+│   │   │   └── schemas.py     # Schémas Pydantic
+│   │   └── __init__.py
+│   └── pyproject.toml         # Dépendances backend
+│
+├── frontend/
+│   ├── app.py                 # Application Streamlit
+│   ├── api_client.py          # Client HTTP vers FastAPI
+│   └── pyproject.toml         # Dépendances frontend
+│
+├── models/
+│   ├── load_data.py           # Chargement dataset
+│   ├── load_model.py          # Chargement modèle ML
+│   ├── recommender.py         # Algorithme recommandations
+│   └── logistic_ridge.joblib  # Modèle entraîné
+│
+├── data/
+│   └── processed/
+│       └── final_dataset.parquet
+│
+├── notebooks/
+│   └── exploration.ipynb      # Exploration data & features
+│
+└── README.md
+
 ```
 ---
 
@@ -169,6 +169,7 @@ uv run streamlit run frontend/app.py
 ```
 Interface : http://localhost:8501
 
+```
 Utilisateur
    ↓
 Frontend (Streamlit)
@@ -182,6 +183,7 @@ Calcul des scores
 Réponse JSON
    ↑
 Frontend (visualisation)
+```
 
 ### 4️⃣ Pour entrainer le modèle
 ```bash

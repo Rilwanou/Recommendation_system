@@ -16,23 +16,12 @@ import matplotlib.pyplot as plt
 
 # -----------------------
 # UI Helpers
-# -----------------------
-def short_id(x: str, left: int = 10, right: int = 6) -> str:
-    if not isinstance(x, str):
-        return str(x)
-    if len(x) <= left + right + 3:
-        return x
-    return f"{x[:left]}...{x[-right:]}"
-
-
-def hero():
+def hero(show_client_hint=False):
     st.markdown(
-        """
-        <div style="padding: 1.2rem; border-radius: 16px; background: #F6F7FB; border: 1px solid #E6E8F0;">
-            <h1 style="margin: 0;">🛒 Système de Recommandation Produits</h1>
-            <p style="margin-top: 0.35rem; color: #444;">
-                Sélectionnez un client pour obtenir des recommandations personnalisées.
-            </p>
+        f"""
+        <div style="padding: 1.2rem 1.2rem; border-radius: 16px; background: #F6F7FB; border: 1px solid #E6E8F0;">
+            <h1 style="margin: 0; color: #000;">🛒 Système de Recommandation Produits</h1>
+            {"<p style='margin: 0.4rem 0 0 0; color: #000;'>Sélectionnez un client pour obtenir des recommandations personnalisées</p>" if show_client_hint else ""}
         </div>
         """,
         unsafe_allow_html=True,
@@ -64,30 +53,22 @@ def cached_profile(_api_client, customer_id: str):
 # -----------------------
 def sidebar_controls(health_status: dict):
     with st.sidebar:
-        st.markdown("## ⚙️ Paramètres")
-        top_k = st.slider("Top-K recommandations", 1, 20, 10, 1, key="top_k")
-        min_score = st.slider("Score minimum", 0.0, 1.0, 0.0, 0.05, key="min_score")
+        st.markdown("## ✅ Statut Backend")
 
-        st.divider()
-
-        with st.expander("✅ Statut système", expanded=True):
-            if health_status.get("status") == "healthy":
-                st.success("Backend connecté")
-                if health_status.get("model_loaded"):
-                    st.success("Modèle chargé")
-                if health_status.get("data_loaded"):
-                    st.success("Données chargées")
-            else:
-                st.error("Backend indisponible")
-                if health_status.get("error"):
-                    st.caption(health_status["error"])
-
-            st.caption("Graphiques : " + ("Plotly" if PLOTLY_OK else "Matplotlib"))
+        # Health check
+        if health_status["status"] == "healthy":
+            st.success("✅ API opérationnelle")
+            if health_status.get("model_loaded"):
+                st.success("✅ Modèle chargé")
+            if health_status.get("data_loaded"):
+                st.success("✅ Données chargées")
+        else:
+            st.error("❌ Backend non disponible")
+            if "error" in health_status:
+                st.caption(f"Erreur: {health_status['error']}")
 
         st.divider()
         st.caption("💡 Conseil : commence par **Recommandations**.")
-
-    return top_k, min_score
 
 
 def backend_gate(health: dict):
@@ -263,7 +244,8 @@ def show_reco_charts(recs: pd.DataFrame):
 # -----------------------
 def run_app():
     st.set_page_config(page_title="Système de Recommandation", layout="wide")
-    hero()
+
+    hero(show_client_hint=False)
 
     api_client = get_api_client()
 
@@ -275,9 +257,32 @@ def run_app():
     with st.spinner("Connexion au backend..."):
         health = api_client.health_check()
 
-    top_k, min_score = sidebar_controls(health)
-    backend_gate(health)
+    # ❌ Bloquer l'app si backend non disponible
+    if health["status"] != "healthy":
+        st.error(
+            "⚠️ **Le backend n'est pas disponible ou n'a pas démarré correctement**"
+        )
 
+        st.markdown("### 🔧 Pour démarrer le backend :")
+        st.code(
+            """
+cd backend
+uvicorn backend.src.api.main:app --reload
+        """,
+            language="bash",
+        )
+
+        st.markdown("### 📝 Détails :")
+        if "error" in health:
+            st.error(health["error"])
+
+        st.info("Une fois le backend démarré, rechargez cette page (F5 ou Ctrl+R)")
+        st.stop()  # ⛔ Arrêter complètement l'exécution
+
+    # ✅ Backend OK, on continue
+    st.success("✅ Backend connecté et opérationnel")
+
+    # Onglets
     tab_home, tab_rec, tab_viz = st.tabs(
         ["🏠 Accueil", "🎯 Recommandations", "📊 Visualisations"]
     )
@@ -287,6 +292,9 @@ def run_app():
 
     with tab_rec:
         st.markdown("## 🎯 Recommandations personnalisées")
+        with st.expander("⚙️ Paramètres de recommandation", expanded=True):
+            top_k = st.slider("Top-K recommandations", 1, 20, 10, 1, key="top_k")
+            min_score = st.slider("Score minimum", 0.0, 1.0, 0.0, 0.05, key="min_score")
 
         with st.spinner("Chargement des clients..."):
             customers = cached_customers(api_client)

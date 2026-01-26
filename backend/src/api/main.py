@@ -17,7 +17,7 @@ from api.router import router
 app = FastAPI(
     title="Olist Recommendation System API",
     version="1.0.0",
-    description="API REST pour le système de recommandation"
+    description="API REST pour le système de recommandation",
 )
 
 
@@ -43,16 +43,13 @@ app.add_middleware(
 # Inclusion des routes
 # =====================================
 
-app.include_router(
-    router,
-    prefix="/api/v1",
-    tags=["API v1"]
-)
+app.include_router(router, prefix="/api/v1", tags=["API v1"])
 
 
 # =====================================
 # Route racine
 # =====================================
+
 
 @app.get("/", tags=["Root"])
 def read_root():
@@ -73,5 +70,5 @@ def read_root():
             "customers": "/api/v1/customers",
             "categories": "/api/v1/categories",
             "candidates": "/api/v1/candidates",
-        }
+        },
     }

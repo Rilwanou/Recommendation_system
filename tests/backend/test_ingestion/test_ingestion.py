@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from pathlib import Path
-
+import sys
 import pandas as pd
 import pytest
 from pydantic import ValidationError
-from data_ingestion import ingestion as mod
+
+
+root = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.insert(0, str(root))
+
+from backend.src.services import ingestion as mod
 
 
 def _write_csv(path: Path, df: pd.DataFrame) -> None:

@@ -13,6 +13,7 @@ class ItemFeatures(BaseModel):
     Features d'un item pour la prédiction individuelle.
     Utilisé par la route /predict
     """
+
     price: float = Field(..., description="Prix du produit")
     product_photos_qty: int = Field(..., description="Nombre de photos")
     product_weight_g: float = Field(..., description="Poids en grammes")
@@ -22,11 +23,13 @@ class ItemFeatures(BaseModel):
     purchase_count: int = Field(..., description="Nombre d'achats total")
     purchase_count_state: int = Field(..., description="Nombre d'achats dans l'état")
     recency_days: int = Field(..., description="Jours depuis dernier achat")
-    
+
     # Optionnels pour enrichissement
     customer_state: Optional[str] = Field(None, description="État du client")
     customer_city: Optional[str] = Field(None, description="Ville du client")
-    product_category_name_english: Optional[str] = Field(None, description="Catégorie produit")
+    product_category_name_english: Optional[str] = Field(
+        None, description="Catégorie produit"
+    )
 
     class Config:
         schema_extra = {
@@ -42,7 +45,7 @@ class ItemFeatures(BaseModel):
                 "recency_days": 30,
                 "customer_state": "SP",
                 "customer_city": "sao paulo",
-                "product_category_name_english": "housewares"
+                "product_category_name_english": "housewares",
             }
         }
 
@@ -52,11 +55,8 @@ class PredictionResponse(BaseModel):
     Réponse de prédiction pour un item individuel.
     Utilisé par la route /predict
     """
+
     score: float = Field(..., description="Probabilité d'achat [0-1]", ge=0.0, le=1.0)
-    
+
     class Config:
-        schema_extra = {
-            "example": {
-                "score": 0.753
-            }
-        }
+        schema_extra = {"example": {"score": 0.753}}

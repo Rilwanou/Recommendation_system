@@ -115,14 +115,20 @@ def get_dataset():
 
 @router.post("/data_proc")
 def run_ingestion(req: IngestionRequest):
-    """Ingestion et traitement des données"""
+    """
+    Déclenche le pipeline d’ingestion et de préparation des données
+    et retourne un résumé de l’exécution.
+    """
     summary = run_ingestion_with_summary()
     return {"ok": True, "summary": summary}
 
 
 @router.post("/predict", response_model=PredictionResponse)
 def predict(features: ItemFeatures):
-    """Prédiction individuelle pour un item"""
+    """
+    Effectue une prédiction de probabilité pour un item
+    à partir des caractéristiques fournies.
+    """
     model = get_model()
 
     X = pd.DataFrame([features.dict()])
@@ -138,7 +144,10 @@ def predict(features: ItemFeatures):
 
 @router.get("/health", response_model=HealthResponse)
 def health_check():
-    """Vérifie que l'API, le modèle et les données sont opérationnels"""
+    """
+    Vérifie la disponibilité du modèle entraîné et du jeu de données
+    afin d’évaluer l’état global de l’API.
+    """
     model_loaded = False
     data_loaded = False
 
@@ -166,7 +175,10 @@ def health_check():
 
 @router.get("/customers", response_model=List[str])
 def get_customers():
-    """Retourne la liste des IDs clients disponibles depuis le dataset"""
+    """
+    Récupère la liste des identifiants clients uniques présents
+    dans le jeu de données chargé.
+    """
     try:
         df = get_dataset()
         customers = get_unique_customers(df)
@@ -186,7 +198,9 @@ def get_customers():
 
 @router.get("/customers/{customer_unique_id}", response_model=CustomerProfile)
 def get_customer_profile_route(customer_unique_id: str):
-    """Retourne le profil d'un client spécifique"""
+    """
+    Retourne le profil détaillé d’un client donné à partir de son identifiant unique.
+    """
     try:
         df = get_dataset()
         profile = get_customer_profile(df, customer_unique_id)
@@ -206,7 +220,10 @@ def get_customer_profile_route(customer_unique_id: str):
 
 @router.get("/products")
 def get_products():
-    """Retourne tous les produits disponibles"""
+    """
+    Retourne la liste de tous les produits disponibles dans le dataset,
+    ainsi que le nombre total de produits.
+    """
     try:
         df = get_dataset()
         products = get_all_products(df)
@@ -223,7 +240,8 @@ def get_products():
 @router.post("/recommendations", response_model=RecommendationResponse)
 def generate_recommendations(request: RecommendationRequest):
     """
-    Génère des recommandations personnalisées pour un client.
+    Génère des recommandations de produits pour un client donné
+    à partir de son profil, du modèle entraîné et du catalogue produits.
     """
     try:
         # Charger le dataset et le modèle
@@ -238,18 +256,17 @@ def generate_recommendations(request: RecommendationRequest):
                 detail=f"Client {request.customer_unique_id} non trouvé",
             )
 
-        # Récupérer les produits
+        # Récupérer les produits disponibles
         products = get_all_products(df)
-
         if products.empty:
             raise HTTPException(status_code=404, detail="Aucun produit disponible")
 
-        # Calculer les recommandations via models/recommender.py
+        # Générer les recommandations via le moteur de recommandation
         recommendations_df = recommend_items(
             model, profile, products, top_k=request.n_recommendations
         )
 
-        # Filtrer par score minimum
+        # Appliquer un seuil minimal sur le score
         if "score" in recommendations_df.columns:
             recommendations_df = recommendations_df[
                 recommendations_df["score"] >= request.min_score
@@ -261,9 +278,9 @@ def generate_recommendations(request: RecommendationRequest):
                 detail=f"Aucune recommandation avec score >= {request.min_score}",
             )
 
-        # Formater la réponse
+        # Construire la réponse API
         recommendations_list = []
-        for idx, row in recommendations_df.iterrows():
+        for _, row in recommendations_df.iterrows():
             recommendations_list.append(
                 RecommendationItem(
                     rank=len(recommendations_list) + 1,

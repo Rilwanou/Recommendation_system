@@ -16,15 +16,12 @@ import matplotlib.pyplot as plt
 
 # -----------------------
 # UI Helpers
-# -----------------------
-def hero():
+def hero(show_client_hint=False):
     st.markdown(
-        """
+        f"""
         <div style="padding: 1.2rem 1.2rem; border-radius: 16px; background: #F6F7FB; border: 1px solid #E6E8F0;">
-            <h1 style="margin: 0;">🛒 Système de Recommandation Produits</h1>
-            <p style="margin: 0.4rem 0 0 0; color: #444;">
-                Sélectionnez un client pour obtenir des recommandations personnalisées
-            </p>
+            <h1 style="margin: 0; color: #000;">🛒 Système de Recommandation Produits</h1>
+            {"<p style='margin: 0.4rem 0 0 0; color: #000;'>Sélectionnez un client pour obtenir des recommandations personnalisées</p>" if show_client_hint else ""}
         </div>
         """,
         unsafe_allow_html=True,
@@ -34,11 +31,6 @@ def hero():
 
 def sidebar_controls(health_status):
     with st.sidebar:
-        st.markdown("## ⚙️ Paramètres")
-        top_k = st.slider("Top-K recommandations", 1, 20, 10, 1, key="top_k")
-        min_score = st.slider("Score minimum", 0.0, 1.0, 0.0, 0.05, key="min_score")
-
-        st.divider()
         st.markdown("## ✅ Statut Backend")
 
         # Health check
@@ -53,16 +45,8 @@ def sidebar_controls(health_status):
             if "error" in health_status:
                 st.caption(f"Erreur: {health_status['error']}")
 
-        # Status Plotly
-        if PLOTLY_OK:
-            st.success("✅ Graphiques interactifs")
-        else:
-            st.info("📊 Graphiques standard")
-
         st.divider()
         st.caption("💡 Sélectionnez un client dans l'onglet **Recommandations**")
-
-    return top_k, min_score
 
 
 def show_reco_charts(recs: pd.DataFrame):
@@ -152,12 +136,6 @@ def accueil_section():
         **Architecture :**
         - 🔙 Backend: FastAPI (port 8000) - Modèle ML + Données
         - 🎨 Frontend: Streamlit (port 8501) - Interface uniquement
-        
-        **Pour démarrer le backend :**
-        ```bash
-        cd backend
-        uvicorn src.api.main:app --reload
-        ```
         """
     )
 
@@ -168,7 +146,7 @@ def accueil_section():
 def run_app():
     st.set_page_config(page_title="Système de Recommandation", layout="wide")
 
-    hero()
+    hero(show_client_hint=False)
 
     # Initialiser le client API
     api_client = get_api_client()
@@ -183,9 +161,6 @@ def run_app():
     with st.spinner("Connexion au backend..."):
         health = api_client.health_check()
 
-    # Sidebar avec status
-    top_k, min_score = sidebar_controls(health)
-
     # ❌ Bloquer l'app si backend non disponible
     if health["status"] != "healthy":
         st.error(
@@ -196,12 +171,12 @@ def run_app():
         st.code(
             """
 cd backend
-uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.src.api.main:app --reload
         """,
             language="bash",
         )
 
-        st.markdown("### 📝 Détails de l'erreur :")
+        st.markdown("### 📝 Détails :")
         if "error" in health:
             st.error(health["error"])
 
@@ -223,6 +198,9 @@ uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
     # Recommandations
     with tab_rec:
         st.markdown("## 🎯 Recommandations personnalisées")
+        with st.expander("⚙️ Paramètres de recommandation", expanded=True):
+            top_k = st.slider("Top-K recommandations", 1, 20, 10, 1, key="top_k")
+            min_score = st.slider("Score minimum", 0.0, 1.0, 0.0, 0.05, key="min_score")
 
         # Récupérer la liste des clients
         with st.spinner("Chargement des clients..."):

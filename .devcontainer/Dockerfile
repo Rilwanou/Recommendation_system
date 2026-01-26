@@ -19,5 +19,5 @@ COPY front-end/ front-end/
 
 EXPOSE 8501
 
-CMD ["uv", "run", "streamlit", "run", "frontend/__main__.py", "--server.address=0.0.0.0", "--server.port=8501"]
+CMD ["uv", "run", "streamlit", "run", "frontend/main.py", "--server.address=0.0.0.0", "--server.port=8501"]
 

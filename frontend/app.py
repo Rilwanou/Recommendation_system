@@ -313,7 +313,13 @@ uvicorn backend.src.api.main:app --reload
 
     # Onglets
     tab_home, tab_rec, tab_monitoring, tab_viz, tab_analysis = st.tabs(
-        ["🏠 Accueil", "🎯 Recommandations", "🩺 Monitoring modèle", "📊 Visualisations", "📈 Analyse dataset"]
+        [
+            "🏠 Accueil",
+            "🎯 Recommandations",
+            "🩺 Monitoring modèle",
+            "📊 Visualisations",
+            "📈 Analyse dataset",
+        ]
     )
 
     with tab_home:
@@ -441,7 +447,6 @@ uvicorn backend.src.api.main:app --reload
 
     with tab_viz:
         show_reco_charts(st.session_state["recs"])
-
 
     with tab_analysis:
         st.markdown("## 📈 Analyse du dataset")

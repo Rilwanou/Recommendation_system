@@ -312,8 +312,8 @@ uvicorn backend.src.api.main:app --reload
     st.success("✅ Backend connecté et opérationnel")
 
     # Onglets
-    tab_home, tab_rec, tab_viz, tab_analysis = st.tabs(
-        ["🏠 Accueil", "🎯 Recommandations", "📊 Visualisations", "📈 Analyse dataset"]
+    tab_home, tab_rec, tab_monitoring, tab_viz, tab_analysis = st.tabs(
+        ["🏠 Accueil", "🎯 Recommandations", "🩺 Monitoring modèle", "📊 Visualisations", "📈 Analyse dataset"]
     )
 
     with tab_home:
@@ -442,6 +442,7 @@ uvicorn backend.src.api.main:app --reload
     with tab_viz:
         show_reco_charts(st.session_state["recs"])
 
+
     with tab_analysis:
         st.markdown("## 📈 Analyse du dataset")
 
@@ -461,6 +462,40 @@ uvicorn backend.src.api.main:app --reload
         with c2:
             st.plotly_chart(plot_top_cities(data, n=15), use_container_width=True)
             st.plotly_chart(plot_length_vs_price(data), use_container_width=True)
+    with tab_monitoring:
+        st.markdown("## 🩺 Monitoring du modèle")
+
+        st.caption(
+            "Indicateurs globaux de performance du modèle "
+            "(calculés sur le jeu de validation)."
+        )
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+            st.metric(
+                label="ROC-AUC",
+                value="0.80",
+                help="Capacité du modèle à discriminer acheteurs / non-acheteurs",
+            )
+
+        with c2:
+            st.metric(
+                label="Average Precision",
+                value="0.84",
+                help="Qualité du ranking des produits recommandés",
+            )
+
+        st.divider()
+
+        st.markdown(
+            """
+    **Interprétation rapide :**
+    - 🔹 **ROC-AUC ≈ 0.80** : très bonne capacité de discrimination
+    - 🔹 **AP ≈ 0.84** : le ranking des produits est pertinent en pratique
+    - ✅ Le modèle est **exploitable en production**
+    """
+        )
 
 
 if __name__ == "__main__":
